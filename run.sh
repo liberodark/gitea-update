@@ -4,7 +4,7 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.2"
+version="0.0.3"
 
 echo "Welcome on Gitea Update Script $version"
 
@@ -37,9 +37,9 @@ echo "What version Download ? Ex : 1.11.3"
 read -r version
 
 install(){
-      echo "Downloading Gitea "$version""
+      echo "Downloading Gitea $version"
       pushd "$destination" || exit
-      wget -Nnv -O gitea_new "https://github.com/go-gitea/gitea/releases/download/v"$version"/gitea-"$version"-linux-amd64" &> /dev/null || exit
+      wget -Nnv -O gitea_new "https://github.com/go-gitea/gitea/releases/download/v$version/gitea-$version-linux-amd64" &> /dev/null || exit
       systemctl stop gitea
       mv gitea gitea_old-"$date"
       mv gitea_new gitea
@@ -47,7 +47,7 @@ install(){
       echo "Old Gitea is Cleaned"
       "remove"
       popd || exit
-      echo "Gitea "$version" is Installed"
+      echo "Gitea $version is Installed"
       systemctl start gitea
       }
 
