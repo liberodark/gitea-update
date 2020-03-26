@@ -4,7 +4,7 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.3"
+version="0.0.4"
 
 echo "Welcome on Gitea Update Script $version"
 
@@ -25,6 +25,7 @@ old_version="3"
 destination="/opt/gitea/"
 lock="/tmp/gitea.lock"
 remove() { ls "$destination""$name"_old-* | head -n -"$old_version" | xargs rm -f; }
+#remove() { find "$destination" -maxdepth 1 -name 'gitea_old-*' | head -n -"$old_version" | xargs rm -f; }
 
 exec 9>"${lock}"
 flock -n 9 || exit
