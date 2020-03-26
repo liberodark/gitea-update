@@ -4,7 +4,7 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.1"
+version="0.0.2"
 
 echo "Welcome on Gitea Update Script $version"
 
@@ -19,7 +19,7 @@ if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 #=================================================
 
 name="gitea"
-version="1.11.3"
+#version="1.11.3"
 date=$(date +%Y.%m.%d_%H-%M-%S)
 old_version="3"
 destination="/opt/gitea/"
@@ -29,12 +29,20 @@ remove() { ls "$destination""$name"_old-* | head -n -"$old_version" | xargs rm -
 exec 9>"${lock}"
 flock -n 9 || exit
 
+#=================================================
+# ASK
+#=================================================
+
+echo "What version Download ? Ex : 1.11.3"
+read -r version
+
 install(){
       echo "Downloading Gitea "$version""
-      systemctl stop gitea
       pushd "$destination" || exit
+      wget -Nnv -O gitea_new "https://github.com/go-gitea/gitea/releases/download/v"$version"/gitea-"$version"-linux-amd64" &> /dev/null || exit
+      systemctl stop gitea
       mv gitea gitea_old-"$date"
-      wget -O "$name" "https://github.com/go-gitea/gitea/releases/download/v"$version"/gitea-"$version"-linux-amd64" &> /dev/null
+      mv gitea_new gitea
       chmod +x gitea
       echo "Old Gitea is Cleaned"
       "remove"
