@@ -41,6 +41,7 @@ install(){
       echo "Downloading Gitea $version"
       pushd "$destination" || exit
       wget -Nnv -O gitea_new "https://github.com/go-gitea/gitea/releases/download/v$version/gitea-$version-linux-amd64" &> /dev/null || exit
+      #wget -Nnv -O gitea_new "https://dl.gitea.io/gitea/$version/gitea-$version-linux-amd64" &> /dev/null || exit
       systemctl stop gitea
       mv gitea gitea_old-"$date"
       mv gitea_new gitea
