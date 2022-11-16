@@ -4,9 +4,9 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.4"
-
-echo "Welcome on Gitea Update Script $version"
+version="0.0.2"
+echo "Welcome on Gitea Update Script ${version}"
+gitea_version=$1
 
 #=================================================
 # CHECK ROOT
@@ -19,13 +19,19 @@ if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 #=================================================
 
 name="gitea"
-#version="1.11.3"
 date=$(date +%Y.%m.%d_%H-%M-%S)
 old_version="3"
 destination="/opt/gitea/"
 lock="/tmp/gitea.lock"
-remove() { ls "$destination""$name"_old-* | head -n -"$old_version" | xargs rm -f; }
-#remove() { find "$destination" -maxdepth 1 -name 'gitea_old-*' | head -n -"$old_version" | xargs rm -f; }
+remove() { ls "${destination}""${name}"_old-* | head -n -"${old_version}" | xargs rm -f; }
+
+usage ()
+{
+     echo "usage: script -v 1.17.3"
+     echo "options :"
+     echo "v : 1.17.3"
+     echo "-h: Show help"
+}
 
 exec 9>"${lock}"
 flock -n 9 || exit
@@ -34,23 +40,47 @@ flock -n 9 || exit
 # ASK
 #=================================================
 
-echo "What version Download ? Ex : 1.11.3"
-read -r version
+set_version(){
+gitea_version="$1"
+}
 
 install(){
-      echo "Downloading Gitea $version"
-      pushd "$destination" || exit
-      wget -Nnv -O gitea_new "https://github.com/go-gitea/gitea/releases/download/v$version/gitea-$version-linux-amd64" &> /dev/null || exit
-      #wget -Nnv -O gitea_new "https://dl.gitea.io/gitea/$version/gitea-$version-linux-amd64" &> /dev/null || exit
+      echo "Downloading Gitea ${gitea_version}"
+      pushd "${destination}" || exit
+      wget -Nnv -O gitea_new "https://github.com/go-gitea/gitea/releases/download/v${gitea_version}/gitea-${gitea_version}-linux-amd64" &> /dev/null || exit
       systemctl stop gitea
-      mv gitea gitea_old-"$date"
+      mv gitea "gitea_old-${date}"
       mv gitea_new gitea
       chmod +x gitea
       echo "Old Gitea is Cleaned"
       "remove"
       popd || exit
-      echo "Gitea $version is Installed"
+      echo "Gitea ${gitea_version} is Installed"
       systemctl start gitea
       }
 
-install
+parse_args ()
+{
+    while [ $# -ne 0 ]
+    do
+        case "${1}" in
+            -v)
+                shift
+                set_version "$@"
+                install
+                ;;
+            -h|--help)
+                usage
+                ;;
+            *)
+                echo "Invalid argument : ${1}" >&2
+                usage >&2
+                exit 1
+                ;;
+        esac
+        shift
+    done
+
+}
+
+parse_args "$@"
